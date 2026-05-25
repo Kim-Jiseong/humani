@@ -18,6 +18,10 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        brand:
+          "bg-brand-gradient text-white shadow-glow-brand hover:shadow-glow-brand-strong transition-[background-position,box-shadow,transform] duration-300",
+        glass:
+          "glass text-foreground hover:shadow-glow-brand hover:border-[color-mix(in_oklch,var(--brand-2)_45%,transparent)] transition-[box-shadow,border-color,background-color] duration-200",
       },
       size: {
         default:

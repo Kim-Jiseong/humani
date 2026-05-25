@@ -49,6 +49,21 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Brand ramp — consumers blend with background via color-mix when needed. */
+  --color-brand-1: var(--brand-1);
+  --color-brand-2: var(--brand-2);
+  --color-brand-3: var(--brand-3);
+  --color-brand-4: var(--brand-4);
+
+  /* Glass surfaces are mode-sensitive (see :root / .dark). */
+  --color-glass: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+
+  /* Branded glows exposed as `shadow-glow-brand` / `shadow-glow-brand-strong`. */
+  --shadow-glow-brand: var(--glow-brand);
+  --shadow-glow-brand-strong: var(--glow-brand-strong);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -58,8 +73,15 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Smoothly animatable conic-gradient angle (registered property). */
+@property --conic-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.99 0.003 240);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -70,83 +92,373 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.48 0.01 240);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.92 0.005 240);
+  --input: oklch(0.92 0.005 240);
+  --ring: oklch(0.70 0.17 232);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.875rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-border: oklch(0.92 0.005 240);
+  --sidebar-ring: oklch(0.70 0.17 232);
+
+  /* Brand ramp — cool refined Blue → Cyan → Teal, no violet/pink. */
+  --brand-1: oklch(0.62 0.20 258);
+  --brand-2: oklch(0.70 0.17 232);
+  --brand-3: oklch(0.78 0.13 200);
+  --brand-4: oklch(0.84 0.11 178);
+
+  /* Light: white-tinted glass + dark hairline. */
+  --glass-bg: oklch(1 0 0 / 65%);
+  --glass-border: oklch(0 0 0 / 8%);
+
+  /* Aurora intensities — light mode subtler so text stays readable. */
+  --aurora-1-strength: 18%;
+  --aurora-2-strength: 14%;
+  --aurora-3-strength: 12%;
+
+  /* Branded glows. */
+  --glow-brand: 0 0 40px -8px color-mix(in oklch, var(--brand-2) 55%, transparent);
+  --glow-brand-strong: 0 0 70px -10px color-mix(in oklch, var(--brand-3) 70%, transparent);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.13 0.01 240);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.18 0.005 240);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.18 0.005 240);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --secondary: oklch(0.24 0.008 240);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --muted: oklch(0.24 0.008 240);
+  --muted-foreground: oklch(0.72 0.01 240);
+  --accent: oklch(0.24 0.008 240);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.73 0.17 232);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0.16 0.008 240);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.65 0.20 258);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent: oklch(0.24 0.008 240);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.73 0.17 232);
+
+  --brand-1: oklch(0.65 0.20 258);
+  --brand-2: oklch(0.73 0.17 232);
+  --brand-3: oklch(0.80 0.13 200);
+  --brand-4: oklch(0.86 0.11 178);
+
+  /* Dark: ink-tinted glass + light hairline. */
+  --glass-bg: oklch(0.18 0.008 240 / 60%);
+  --glass-border: oklch(1 0 0 / 9%);
+
+  --aurora-1-strength: 28%;
+  --aurora-2-strength: 22%;
+  --aurora-3-strength: 18%;
+
+  --glow-brand: 0 0 40px -6px color-mix(in oklch, var(--brand-2) 65%, transparent);
+  --glow-brand-strong: 0 0 80px -8px color-mix(in oklch, var(--brand-3) 80%, transparent);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
     @apply font-sans;
   }
+  body {
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--brand-3) 35%, transparent);
+    color: var(--foreground);
+  }
 }
+
+@layer utilities {
+  /* Ambient mesh — three soft radial gradients drifting via `aurora-shift`.
+     Strength is mode-controlled by `--aurora-*-strength` so light/dark feel
+     calibrated without forking the gradient itself. */
+  .bg-aurora {
+    background-image:
+      radial-gradient(
+        60% 50% at 18% 8%,
+        color-mix(in oklch, var(--brand-1) var(--aurora-1-strength), transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        55% 45% at 82% 22%,
+        color-mix(in oklch, var(--brand-3) var(--aurora-2-strength), transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        50% 50% at 50% 100%,
+        color-mix(in oklch, var(--brand-4) var(--aurora-3-strength), transparent),
+        transparent 70%
+      );
+    background-size: 140% 140%, 130% 130%, 150% 150%;
+    background-position: 0% 0%, 100% 0%, 50% 100%;
+    animation: aurora-shift 24s ease-in-out infinite alternate;
+  }
+
+  /* Subtle SVG noise overlay — ~3% opacity, GPU-cheap. */
+  .bg-noise {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 200px 200px;
+    opacity: 0.035;
+  }
+
+  /* Linear iridescent fill — used by the brand button and active accents. */
+  .bg-brand-gradient {
+    background-image: linear-gradient(
+      135deg,
+      var(--brand-1),
+      var(--brand-2),
+      var(--brand-3),
+      var(--brand-4)
+    );
+    background-size: 200% 200%;
+    background-position: 0% 0%;
+    transition: background-position 400ms ease;
+  }
+  .bg-brand-gradient:hover {
+    background-position: 100% 100%;
+  }
+
+  /* Vertical bar — left edge accent used on assistant messages, active rows. */
+  .bar-brand {
+    background-image: linear-gradient(
+      180deg,
+      var(--brand-1),
+      var(--brand-2),
+      var(--brand-3)
+    );
+  }
+
+  /* Iridescent text — assumes consumer also sets a font-size; works on
+     `<span>` or `<h1>` alike. */
+  .text-brand-gradient {
+    background-image: linear-gradient(
+      90deg,
+      var(--brand-1),
+      var(--brand-2),
+      var(--brand-3),
+      var(--brand-4)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 1px gradient border using the dual-background-clip trick.
+     Element keeps its own `bg-*` via padding-box; the border-box layer
+     renders the gradient ring. */
+  .border-gradient {
+    border: 1px solid transparent;
+    background-image:
+      linear-gradient(var(--card), var(--card)),
+      linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--brand-1) 60%, transparent),
+        color-mix(in oklch, var(--brand-3) 60%, transparent),
+        color-mix(in oklch, var(--brand-4) 60%, transparent)
+      );
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+  /* Variant: keep the gradient ring but let the inside stay transparent
+     (composes with `.glass`). */
+  .border-gradient-glass {
+    border: 1px solid transparent;
+    background-image:
+      linear-gradient(var(--glass-bg), var(--glass-bg)),
+      linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--brand-1) 50%, transparent),
+        color-mix(in oklch, var(--brand-3) 50%, transparent),
+        color-mix(in oklch, var(--brand-4) 50%, transparent)
+      );
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  /* Frosted glass surface. */
+  .glass {
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+  }
+  .glass-strong {
+    background-color: color-mix(in oklch, var(--glass-bg) 85%, var(--background));
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Rotating conic gradient border (used by Composer on :focus-within).
+     The mask-composite trick punches out the inside so only a 1px ring
+     remains; @property --conic-angle drives smooth rotation. */
+  .conic-border {
+    position: relative;
+  }
+  .conic-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+      from var(--conic-angle),
+      var(--brand-1),
+      var(--brand-2),
+      var(--brand-3),
+      var(--brand-4),
+      var(--brand-1)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 220ms ease;
+  }
+  .conic-border:focus-within::before,
+  .conic-border[data-active="true"]::before {
+    opacity: 1;
+    animation: rotate-conic 4s linear infinite;
+  }
+
+  /* Iridescent shimmer sweep — used on streaming assistant messages and
+     skeleton placeholders. */
+  .shimmer-iridescent {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer-iridescent::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 30%,
+      color-mix(in oklch, var(--brand-1) 12%, transparent) 45%,
+      color-mix(in oklch, var(--brand-3) 14%, transparent) 55%,
+      transparent 70%
+    );
+    background-size: 220% 100%;
+    background-position: -100% 0;
+    animation: shimmer 1.8s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* Floating footer fade — masks messages as they scroll under the composer. */
+  .footer-fade {
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      var(--background) 0%,
+      color-mix(in oklch, var(--background) 60%, transparent) 60%,
+      transparent 100%
+    );
+  }
+}
+
+/* ───── Keyframes ────────────────────────────────────────────────────── */
 
 @keyframes blink {
   50% {
     opacity: 0;
   }
 }
-
 .blink-cursor {
   animation: blink 0.5s steps(2, end) infinite;
+}
+
+@keyframes rotate-conic {
+  to {
+    --conic-angle: 360deg;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes aurora-shift {
+  0% {
+    background-position: 0% 0%, 100% 0%, 50% 100%;
+  }
+  50% {
+    background-position: 20% 10%, 80% 30%, 60% 90%;
+  }
+  100% {
+    background-position: 10% 5%, 90% 15%, 45% 95%;
+  }
+}
+
+@keyframes brand-pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Respect reduced-motion preferences: kill rotations/shimmers/aurora drift,
+   keep backdrop-filter and gradient surfaces intact. */
+@media (prefers-reduced-motion: reduce) {
+  .bg-aurora {
+    animation: none;
+  }
+  .conic-border:focus-within::before,
+  .conic-border[data-active="true"]::before {
+    animation: none;
+  }
+  .shimmer-iridescent::after {
+    animation: none;
+    opacity: 0;
+  }
+  .blink-cursor {
+    animation: none;
+  }
 }
 
 /* ───── Streamdown overrides ─────────────────────────────────────────── */

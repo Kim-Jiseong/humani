@@ -5,8 +5,10 @@ import type { UIMessage } from 'ai'
 import { Streamdown } from 'streamdown'
 import { mermaid } from '@streamdown/mermaid'
 import { math } from '@streamdown/math'
+import { motion, AnimatePresence } from 'motion/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
+import { BrandOrb } from '@/components/brand-orb'
 import { cn } from '@/lib/utils'
 import { ToolRenderHtml } from './tool-render-html'
 import { ReasoningBlock } from './reasoning-block'
@@ -75,131 +77,149 @@ export function MessageList({
 
   return (
     <ScrollArea className="h-full">
-      <div className="flex flex-col gap-3 px-4 py-4">
+      <div className="flex flex-col gap-5 px-4 py-6 pb-28">
         {messages.length === 0 && !showWaitingDots && (
-          <div className="py-12 text-center text-sm text-muted-foreground">
-            메시지를 입력해 대화를 시작하세요.
+          <div className="flex min-h-[55vh] flex-col items-center justify-center gap-5 text-center">
+            <BrandOrb size="md" />
+            <div className="space-y-1.5">
+              <h2 className="text-brand-gradient text-xl font-semibold tracking-tight">
+                무엇이 궁금하신가요?
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                메시지를 입력해 대화를 시작하세요.
+              </p>
+            </div>
           </div>
         )}
 
-        {messages.map((message, mIdx) => {
-          const isLastMessage = mIdx === lastIdx
-          const lastStreamableIdx = message.parts.reduce(
-            (acc, p, i) =>
-              p.type === 'text' || p.type === 'reasoning' ? i : acc,
-            -1,
-          )
+        <AnimatePresence initial={false}>
+          {messages.map((message, mIdx) => {
+            const isLastMessage = mIdx === lastIdx
+            const lastStreamableIdx = message.parts.reduce(
+              (acc, p, i) =>
+                p.type === 'text' || p.type === 'reasoning' ? i : acc,
+              -1,
+            )
 
-          return (
-            <div
-              key={message.id}
-              className={cn(
-                'flex w-full flex-col gap-2',
-                message.role === 'user' ? 'items-end' : 'items-start',
-              )}
-            >
-              {message.parts.map((part, idx) => {
-                const key = `${message.id}-${idx}`
-                const p = part as AnyPart
-                const showCursor =
-                  isLastMessage &&
-                  isStreamingLast &&
-                  idx === lastStreamableIdx
+            return (
+              <motion.div
+                key={message.id}
+                layout="position"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className={cn(
+                  'flex w-full flex-col gap-2',
+                  message.role === 'user' ? 'items-end' : 'items-start',
+                )}
+              >
+                {message.parts.map((part, idx) => {
+                  const key = `${message.id}-${idx}`
+                  const p = part as AnyPart
+                  const showCursor =
+                    isLastMessage &&
+                    isStreamingLast &&
+                    idx === lastStreamableIdx
 
-                if (part.type === 'text') {
-                  if (message.role === 'user') {
+                  if (part.type === 'text') {
+                    if (message.role === 'user') {
+                      return (
+                        <div
+                          key={key}
+                          className="wrap-break-word max-w-[85%] min-w-0 rounded-3xl rounded-br-lg border border-black/6 bg-black/4 px-4 py-2.5 text-[15px] leading-[1.55] whitespace-pre-wrap text-foreground dark:border-white/10 dark:bg-white/6"
+                        >
+                          {p.text}
+                        </div>
+                      )
+                    }
                     return (
                       <div
                         key={key}
-                        className="max-w-[85%] min-w-0 whitespace-pre-wrap wrap-break-word rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-sm leading-relaxed text-primary-foreground"
+                        className="w-full max-w-[95%] min-w-0 text-[15px] leading-[1.65] text-foreground"
                       >
-                        {p.text}
+                        <Streamdown parseIncompleteMarkdown plugins={plugins}>
+                          {p.text ?? ''}
+                        </Streamdown>
+                        {showCursor && (
+                          <span
+                            className="blink-cursor ml-0.5 inline-block h-[0.95em] w-[3px] rounded-full bg-linear-to-b from-brand-1 to-brand-3 align-middle"
+                            aria-hidden
+                          />
+                        )}
                       </div>
                     )
                   }
-                  return (
-                    <div
-                      key={key}
-                      className="w-full max-w-[85%] min-w-0 rounded-2xl rounded-bl-sm bg-muted px-3 py-2 text-sm leading-relaxed text-foreground"
-                    >
-                      <Streamdown
-                        parseIncompleteMarkdown
-                        plugins={plugins}
-                      >
-                        {p.text ?? ''}
-                      </Streamdown>
-                      {showCursor && (
-                        <span
-                          className="blink-cursor ml-0.5 inline-block h-[0.95em] w-[3px] bg-current align-middle"
-                          aria-hidden
-                        />
-                      )}
-                    </div>
-                  )
-                }
 
-                if (part.type === 'reasoning') {
-                  return (
-                    <ReasoningBlock
-                      key={key}
-                      text={p.text ?? ''}
-                      isStreaming={showCursor}
-                      showCursor={showCursor}
-                    />
-                  )
-                }
+                  if (part.type === 'reasoning') {
+                    return (
+                      <ReasoningBlock
+                        key={key}
+                        text={p.text ?? ''}
+                        isStreaming={showCursor}
+                        showCursor={showCursor}
+                      />
+                    )
+                  }
 
-                if (part.type === 'tool-renderHtml') {
-                  return <ToolRenderHtml key={key} part={part as never} />
-                }
+                  if (part.type === 'tool-renderHtml') {
+                    return <ToolRenderHtml key={key} part={part as never} />
+                  }
 
-                if (part.type === 'step-start') {
+                  if (part.type === 'step-start') {
+                    return null
+                  }
+
                   return null
-                }
-
-                return null
-              })}
-            </div>
-          )
-        })}
+                })}
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
 
         {showWaitingDots && (
-          <div className="flex items-start">
-            <div className="rounded-2xl rounded-bl-sm bg-muted px-3 py-2 text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
-                <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
-                <span className="size-1.5 animate-bounce rounded-full bg-current" />
-              </span>
-            </div>
+          <div className="flex items-center gap-1.5 py-1">
+            <span
+              className="size-1.5 rounded-full bg-brand-1"
+              style={{
+                animation: 'brand-pulse 1.2s ease-in-out -0.3s infinite',
+              }}
+            />
+            <span
+              className="size-1.5 rounded-full bg-brand-2"
+              style={{
+                animation: 'brand-pulse 1.2s ease-in-out -0.15s infinite',
+              }}
+            />
+            <span
+              className="size-1.5 rounded-full bg-brand-3"
+              style={{
+                animation: 'brand-pulse 1.2s ease-in-out 0s infinite',
+              }}
+            />
           </div>
         )}
 
         {(error || staleUserTrailing) && onRegenerate && (
-          <div className="flex items-start">
-            <div
-              className={cn(
-                'flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-bl-sm px-3 py-2 text-sm',
-                error
-                  ? 'border border-destructive/30 bg-destructive/10 text-destructive'
-                  : 'bg-muted text-muted-foreground',
-              )}
+          <div
+            className={cn(
+              'flex w-full max-w-[95%] flex-col gap-2 text-sm',
+              error ? 'text-destructive' : 'text-muted-foreground',
+            )}
+          >
+            <span>
+              {error
+                ? `응답 생성 중 오류가 발생했습니다${error.message ? ` (${error.message})` : ''}.`
+                : '응답이 도착하지 않았습니다. 다시 시도해 주세요.'}
+            </span>
+            <Button
+              type="button"
+              onClick={onRegenerate}
+              variant={error ? 'destructive' : 'glass'}
+              size="sm"
+              className="self-start"
             >
-              <span>
-                {error
-                  ? `응답 생성 중 오류가 발생했습니다${error.message ? ` (${error.message})` : ''}.`
-                  : '응답이 도착하지 않았습니다. 다시 시도해 주세요.'}
-              </span>
-              <Button
-                type="button"
-                onClick={onRegenerate}
-                variant={error ? 'destructive' : 'secondary'}
-                size="sm"
-                className="self-start"
-              >
-                다시 시도
-              </Button>
-            </div>
+              다시 시도
+            </Button>
           </div>
         )}
 

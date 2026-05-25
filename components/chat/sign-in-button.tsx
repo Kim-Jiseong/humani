@@ -17,7 +17,12 @@ export function SignInButton() {
   }
 
   return (
-    <Button onClick={signIn} size="lg" className="w-full max-w-xs">
+    <Button
+      onClick={signIn}
+      size="lg"
+      variant="glass"
+      className="h-11 w-full max-w-xs gap-2 px-4 font-medium"
+    >
       <svg viewBox="0 0 24 24" className="size-4" aria-hidden>
         <path
           fill="currentColor"

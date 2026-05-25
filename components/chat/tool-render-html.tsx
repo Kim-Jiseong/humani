@@ -2,8 +2,7 @@
 
 import DOMPurify from 'isomorphic-dompurify'
 import { useMemo, useState } from 'react'
-import { Download, Maximize2 } from 'lucide-react'
-import { Card } from '@/components/ui/card'
+import { Download, Maximize2, X } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 
 type RenderHtmlPart = {
   type: 'tool-renderHtml'
@@ -27,6 +27,9 @@ type RenderHtmlPart = {
 
 const HTML_CONTENT_CLASSES =
   'text-sm leading-relaxed [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:px-2 [&_th]:py-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5'
+
+const CARD_SHELL =
+  'glass relative w-full max-w-[95%] overflow-hidden rounded-xl shadow-[0_8px_30px_-12px_oklch(0_0_0/30%)]'
 
 export function ToolRenderHtml({ part }: { part: RenderHtmlPart }) {
   const html = part.input?.html ?? ''
@@ -68,25 +71,28 @@ ${sanitized}
 
   if (part.state === 'input-streaming' && !html) {
     return (
-      <Card className="w-full max-w-[85%] p-3">
+      <div className={cn(CARD_SHELL, 'p-3')}>
         <Skeleton className="h-4 w-2/3" />
         <Skeleton className="mt-2 h-4 w-1/2" />
-      </Card>
+      </div>
     )
   }
 
   if (part.state === 'output-error') {
     return (
-      <Card className="w-full max-w-[85%] p-3 text-xs text-destructive">
+      <div className={cn(CARD_SHELL, 'p-3 text-xs text-destructive')}>
         렌더 오류: {part.errorText ?? 'unknown'}
-      </Card>
+      </div>
     )
   }
 
   return (
     <>
-      <Card className="relative w-full max-w-[85%] overflow-hidden p-3 pt-10">
-        <div className="absolute right-1.5 top-1.5 z-5 flex items-center gap-0.5 rounded-md border bg-background/90 px-1 py-0.5 backdrop-blur">
+      <div className={cn(CARD_SHELL, 'p-3 pt-10')}>
+        <div className="absolute top-1.5 left-1.5 z-5 inline-flex items-center gap-1 rounded-full border border-glass-border bg-glass px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase backdrop-blur">
+          <span className="text-brand-gradient">HTML</span>
+        </div>
+        <div className="absolute top-1.5 right-1.5 z-5 inline-flex items-center gap-0.5 rounded-full border border-glass-border bg-glass px-1 py-0.5 backdrop-blur">
           <Button
             type="button"
             size="icon-xs"
@@ -110,22 +116,25 @@ ${sanitized}
           className={HTML_CONTENT_CLASSES}
           dangerouslySetInnerHTML={{ __html: sanitized }}
         />
-      </Card>
+      </div>
 
       <Dialog open={fullscreen} onOpenChange={setFullscreen}>
         <DialogContent
-          className="left-0 top-0 flex h-dvh w-screen max-w-[100vw] translate-x-0 translate-y-0 flex-col gap-0 rounded-none p-0 ring-0 sm:max-w-none"
+          className="top-0 left-0 flex h-dvh w-screen max-w-[100vw] translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 bg-background p-0 shadow-none sm:max-w-none"
           showCloseButton={false}
         >
-          <DialogHeader className="shrink-0 flex-row items-center justify-between border-b px-4 py-3">
-            <DialogTitle className="text-base">HTML 미리보기</DialogTitle>
+          <DialogHeader className="flex shrink-0 flex-row items-center justify-between border-b border-glass-border px-4 py-3">
+            <DialogTitle className="text-brand-gradient text-base">
+              HTML 미리보기
+            </DialogTitle>
             <Button
               type="button"
-              size="sm"
+              size="icon-sm"
               variant="ghost"
               onClick={() => setFullscreen(false)}
+              aria-label="닫기"
             >
-              닫기
+              <X className="size-4" />
             </Button>
           </DialogHeader>
           <div className="flex-1 overflow-auto p-6">

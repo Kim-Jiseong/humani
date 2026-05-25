@@ -23,7 +23,15 @@
       "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\({ai:p.dependencies.ai,react:p.dependencies['@ai-sdk/react'],google:p.dependencies['@ai-sdk/google'],ssr:p.dependencies['@supabase/ssr'],sjs:p.dependencies['@supabase/supabase-js'],dom:p.dependencies['isomorphic-dompurify'],zod:p.dependencies.zod},null,2\\)\\)\")",
       "Bash(npx shadcn@latest init -d --yes --force)",
       "WebFetch(domain:streamdown.ai)",
-      "mcp__supabase__get_logs"
+      "mcp__supabase__get_logs",
+      "Read(//c/Users/Jiseong/Desktop/学士/4-1/人间工学/semantic-word-cloud-chat/**)",
+      "Read(//c/Users/Jiseong/Desktop/学士/4-1/인간공학/**)",
+      "Read(//c/c/Users/Jiseong/Desktop/학사/4-1/인간공학/semantic-word-cloud-chat/**)",
+      "Read(//c/Users/Jiseong/Desktop/학사/4-1/인간공学/semantic-word-cloud-chat/**)",
+      "Read(//c/Users/Jiseong/Desktop/学士/4-1/인간공学/semantic-word-cloud-chat/**)",
+      "Read(//c/Users/Jiseong/Desktop/学士/4-1/인간公学/semantic-word-cloud-chat/**)",
+      "Read(//c/Users/Jiseong/Desktop/**)",
+      "Bash(xargs -I {} sh -c 'cat \"{}/app/chats/\\\\[id\\\\]/page.tsx\"')"
     ]
   }
 }

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Sparkles } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { cn } from '@/lib/utils'
 
 export function ReasoningBlock({
@@ -17,40 +18,62 @@ export function ReasoningBlock({
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="w-full max-w-[85%] overflow-hidden rounded-2xl rounded-bl-sm border border-border/60 bg-muted/40">
+    <div className="w-full max-w-[95%] overflow-hidden rounded-2xl border border-glass-border bg-glass backdrop-blur-md">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted/70"
+        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-xs transition-colors hover:bg-white/3 dark:hover:bg-white/5"
         aria-expanded={open}
       >
         <span className="flex items-center gap-2">
+          {isStreaming ? (
+            <span
+              aria-hidden
+              className="size-2 rounded-full bg-brand-2 shadow-glow-brand"
+              style={{ animation: 'brand-pulse 1.2s ease-in-out infinite' }}
+            />
+          ) : (
+            <Sparkles className="size-3.5 text-brand-2" />
+          )}
           <span
             className={cn(
-              'size-1.5 rounded-full',
-              isStreaming
-                ? 'animate-pulse bg-emerald-500'
-                : 'bg-muted-foreground/50',
+              'font-medium',
+              isStreaming ? 'text-brand-gradient' : 'text-muted-foreground',
             )}
-          />
-          <span>{isStreaming ? '생각 중…' : '생각 과정'}</span>
+          >
+            {isStreaming ? '생각 중…' : '생각 과정'}
+          </span>
         </span>
         <ChevronDown
-          className={cn('size-3.5 transition-transform', open && 'rotate-180')}
+          className={cn(
+            'size-3.5 text-muted-foreground transition-transform',
+            open && 'rotate-180',
+          )}
         />
       </button>
 
-      {open && (
-        <div className="whitespace-pre-wrap wrap-break-word border-t border-border/60 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-          {text || (isStreaming ? '...' : '')}
-          {showCursor && (
-            <span
-              className="blink-cursor ml-0.5 inline-block h-[0.95em] w-[2px] bg-current align-middle"
-              aria-hidden
-            />
-          )}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="overflow-hidden"
+          >
+            <div className="wrap-break-word border-t border-glass-border px-3 py-2.5 text-xs leading-relaxed whitespace-pre-wrap text-muted-foreground">
+              {text || (isStreaming ? '...' : '')}
+              {showCursor && (
+                <span
+                  className="blink-cursor ml-0.5 inline-block h-[0.95em] w-[2px] bg-current align-middle"
+                  aria-hidden
+                />
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

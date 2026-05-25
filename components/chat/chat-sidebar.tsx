@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { BrandOrb } from '@/components/brand-orb'
 import { cn } from '@/lib/utils'
 import { createNewChatAction } from '@/app/actions/chats'
 import type { ChatRow, ChatUser } from '@/lib/db/chats'
@@ -53,15 +54,18 @@ export function ChatSidebar({
         }
       />
       <SheetContent side="left" className="flex w-72 flex-col p-0 sm:max-w-xs">
-        <SheetHeader className="border-b px-4 py-3">
-          <SheetTitle className="text-base">Humani</SheetTitle>
+        <SheetHeader className="flex-row items-center gap-2 border-b border-glass-border px-4 py-3">
+          <BrandOrb size="sm" />
+          <SheetTitle className="text-brand-gradient text-base">
+            Humani
+          </SheetTitle>
         </SheetHeader>
 
         <div className="p-3">
           <form action={createNewChatAction}>
             <Button
               type="submit"
-              variant="outline"
+              variant="glass"
               size="sm"
               className="w-full justify-start gap-2"
               onClick={() => setOpen(false)}
@@ -78,46 +82,72 @@ export function ChatSidebar({
             </p>
           ) : (
             <ul className="flex flex-col gap-0.5 px-2 pb-3">
-              {chats.map(chat => (
-                <li key={chat.id}>
-                  <Link
-                    href={`/chats/${chat.id}`}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted',
-                      chat.id === currentChatId && 'bg-muted font-medium',
-                    )}
-                  >
-                    <MessageSquare className="size-3.5 shrink-0 text-muted-foreground" />
-                    <span className="flex-1 truncate">{chat.title}</span>
-                    <time className="shrink-0 text-[10px] text-muted-foreground">
-                      {formatRelative(chat.updated_at)}
-                    </time>
-                  </Link>
-                </li>
-              ))}
+              {chats.map(chat => {
+                const active = chat.id === currentChatId
+                return (
+                  <li key={chat.id}>
+                    <Link
+                      href={`/chats/${chat.id}`}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        'group/row relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+                        active
+                          ? 'bg-white/4 font-medium text-foreground'
+                          : 'text-muted-foreground hover:bg-white/3 hover:text-foreground',
+                      )}
+                    >
+                      {active && (
+                        <span
+                          aria-hidden
+                          className="bar-brand shadow-glow-brand absolute top-1.5 bottom-1.5 left-0 w-[2px] rounded-full"
+                        />
+                      )}
+                      <MessageSquare
+                        className={cn(
+                          'size-3.5 shrink-0',
+                          active
+                            ? 'text-brand-2'
+                            : 'text-muted-foreground/70 group-hover/row:text-foreground/80',
+                        )}
+                      />
+                      <span className="flex-1 truncate">{chat.title}</span>
+                      <time className="shrink-0 text-[10px] text-muted-foreground/70">
+                        {formatRelative(chat.updated_at)}
+                      </time>
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </ScrollArea>
 
-        <div className="shrink-0 border-t p-3">
-          <div className="mb-2 flex items-center gap-3 px-1 py-1">
-            <Avatar className="size-9">
+        <div className="flex shrink-0 items-center gap-3 border-t border-glass-border px-3 py-3">
+          <span
+            className="relative inline-block shrink-0 rounded-full p-[1.5px]"
+            style={{
+              backgroundImage:
+                'conic-gradient(from 140deg, var(--brand-1), var(--brand-2), var(--brand-3), var(--brand-4), var(--brand-1))',
+            }}
+          >
+            <Avatar className="size-9 after:hidden">
               {user.avatarUrl && (
                 <AvatarImage src={user.avatarUrl} alt={displayName} />
               )}
-              <AvatarFallback className="text-xs">{initial}</AvatarFallback>
+              <AvatarFallback className="bg-card text-xs">
+                {initial}
+              </AvatarFallback>
             </Avatar>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{displayName}</p>
-              {user.name && (
-                <p className="truncate text-xs text-muted-foreground">
-                  {user.email}
-                </p>
-              )}
-            </div>
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">{displayName}</p>
+            {user.name && (
+              <p className="truncate text-xs text-muted-foreground">
+                {user.email}
+              </p>
+            )}
           </div>
-          <SignOutButton />
+          <SignOutButton className="shrink-0" />
         </div>
       </SheetContent>
     </Sheet>

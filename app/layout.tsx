@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ResponsiveGuard } from '@/components/responsive-guard'
 import { Toaster } from '@/components/ui/sonner'
+import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
 const geistSans = Geist({
@@ -24,7 +25,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#000000',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f9fafb' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0d12' },
+  ],
 }
 
 export default function RootLayout({
@@ -35,11 +39,31 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full">
-        <ResponsiveGuard>{children}</ResponsiveGuard>
-        <Toaster />
+      <body className="relative min-h-full">
+        <ThemeProvider
+          attribute="class"
+          // defaultTheme="system"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {/* Global ambient layers — sit behind everything; pointer-events:none
+              so they never intercept interaction. Fixed so the gradient stays
+              parked while the chat scrolls. */}
+          <div
+            aria-hidden
+            className="pointer-events-none fixed inset-0 -z-20 bg-aurora"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none fixed inset-0 -z-10 bg-noise mix-blend-overlay"
+          />
+          <ResponsiveGuard>{children}</ResponsiveGuard>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   )
