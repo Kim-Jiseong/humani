@@ -4,18 +4,18 @@
 //   2) 현재 ResponsiveGuard 정의 삭제
 //   3) 파일 하단 주석 블록 안의 활성화 버전을 주석 해제
 
-// import { isMobile } from '@/lib/utils/is-mobile'
-// import { DesktopBlock } from './desktop-block'
+import { isMobile } from '@/lib/utils/is-mobile'
+import { DesktopBlock } from './desktop-block'
 
-export function ResponsiveGuard({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return <>{children}</>
-}
+// export function ResponsiveGuard({
+//   children,
+// }: {
+//   children: React.ReactNode
+// }) {
+//   return <>{children}</>
+// }
 
-/* ── 활성화 버전 ──────────────────────────────────────────────
+// ── 활성화 버전 ──────────────────────────────────────────────
 export async function ResponsiveGuard({
   children,
 }: {
@@ -30,4 +30,4 @@ export async function ResponsiveGuard({
     </>
   )
 }
-─────────────────────────────────────────────────────────────── */
+// ─────────────────────────────────────────────────────────────── 
