@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:ai-sdk.dev)",
+      "Read(//c/Users/Jiseong/Desktop/学사/4-1/인간공学/semantic-word-cloud-chat/**)",
+      "Read(//c/Users/Jiseong/Desktop/学사/4-1/인间공学/**)",
+      "Bash(find . -maxdepth 2 -type f \\\\\\( -name \"*.css\" -o -name \"tailwind.config.*\" -o -name \"components.json\" -o -name \".env*\" \\\\\\))",
+      "Read(//c/Users/Jiseong/Desktop/学사/4-1/인간공학/**)",
+      "WebFetch(domain:ai.google.dev)",
+      "Read(//c/Users/Jiseong/Desktop/학사/4-1/인간공学/semantic-word-cloud-chat/app/**)",
+      "Read(//c/Users/Jiseong/Desktop/学사/4-1/인간公学/semantic-word-cloud-chat/app/**)",
+      "Bash(xargs grep *)",
+      "WebFetch(domain:supabase.com)",
+      "Read(//cygdrive/**)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/supabase/supabase/master/examples/auth/nextjs/lib/supabase/client.ts\")",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/supabase/supabase/master/examples/auth/nextjs/lib/supabase/server.ts\")",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/supabase/supabase/master/examples/auth/nextjs/lib/supabase/middleware.ts\")",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/supabase/supabase/master/examples/auth/nextjs/proxy.ts\")",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/supabase/supabase/master/examples/auth/nextjs/middleware.ts\")",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/supabase/supabase/master/examples/auth/nextjs/lib/supabase/proxy.ts\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\({ai:p.dependencies.ai,react:p.dependencies['@ai-sdk/react'],google:p.dependencies['@ai-sdk/google'],ssr:p.dependencies['@supabase/ssr'],sjs:p.dependencies['@supabase/supabase-js'],dom:p.dependencies['isomorphic-dompurify'],zod:p.dependencies.zod},null,2\\)\\)\")",
+      "Bash(npx shadcn@latest init -d --yes --force)",
+      "WebFetch(domain:streamdown.ai)",
+      "mcp__supabase__get_logs"
+    ]
+  }
+}
