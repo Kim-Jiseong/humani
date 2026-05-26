@@ -25,6 +25,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  // Shrink the layout viewport when the on-screen keyboard appears so
+  // `100dvh` reflects the visible area. Composer (anchored at the bottom of
+  // a `h-dvh` flex container) stays just above the keyboard instead of the
+  // whole page scrolling up.
+  interactiveWidget: 'resizes-content',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#f9fafb' },
     { media: '(prefers-color-scheme: dark)', color: '#0a0d12' },

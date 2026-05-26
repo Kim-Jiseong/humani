@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { ArrowUp, Loader2 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
@@ -26,12 +26,9 @@ export function Composer({
     ref.current?.focus()
   }
 
-  function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-      e.preventDefault()
-      submit()
-    }
-  }
+  // Enter inserts a newline (textarea default). Submission is button-only —
+  // prevents accidental sends from the mobile virtual keyboard's return key
+  // and from IME composition commits.
 
   return (
     <form onSubmit={submit}>
@@ -47,7 +44,6 @@ export function Composer({
           ref={ref}
           value={value}
           onChange={e => setValue(e.target.value)}
-          onKeyDown={onKeyDown}
           placeholder="메시지를 입력하세요…"
           rows={1}
           disabled={disabled}
