@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ResponsiveGuard } from '@/components/responsive-guard'
+import { InAppBrowserGuard } from '@/components/in-app-browser-guard'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
@@ -66,7 +67,9 @@ export default function RootLayout({
             aria-hidden
             className="pointer-events-none fixed inset-0 -z-10 bg-noise mix-blend-overlay"
           />
-          <ResponsiveGuard>{children}</ResponsiveGuard>
+          <InAppBrowserGuard>
+            <ResponsiveGuard>{children}</ResponsiveGuard>
+          </InAppBrowserGuard>
           <Toaster />
         </ThemeProvider>
       </body>
