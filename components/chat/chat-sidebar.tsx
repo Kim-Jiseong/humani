@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Menu, MessageSquare, Plus } from 'lucide-react'
+import { Menu, MessageSquare } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils'
 import { createNewChatAction } from '@/app/actions/chats'
 import type { ChatRow, ChatUser } from '@/lib/db/chats'
 import { SignOutButton } from './sign-out-button'
+import { NewChatSubmit } from './new-chat-submit'
 
 function formatRelative(iso: string): string {
   const diffSec = Math.max(
@@ -63,15 +64,13 @@ export function ChatSidebar({
 
         <div className="p-3">
           <form action={createNewChatAction}>
-            <Button
-              type="submit"
+            <NewChatSubmit
               variant="glass"
               size="sm"
               className="w-full justify-start gap-2"
+              showLabel
               onClick={() => setOpen(false)}
-            >
-              <Plus className="size-4" />새 채팅
-            </Button>
+            />
           </form>
         </div>
 

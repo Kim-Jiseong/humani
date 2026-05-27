@@ -7,14 +7,13 @@ import {
   type UIMessage,
 } from 'ai'
 import { useMemo } from 'react'
-import { Plus } from 'lucide-react'
 import type { ChatRow, ChatUser } from '@/lib/db/chats'
-import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { createNewChatAction } from '@/app/actions/chats'
 import { MessageList } from './message-list'
 import { Composer } from './composer'
 import { ChatSidebar } from './chat-sidebar'
+import { NewChatSubmit } from './new-chat-submit'
 
 export function Chat({
   id,
@@ -60,14 +59,7 @@ export function Chat({
         </h1>
         <div className="ml-auto flex items-center gap-0.5">
           <form action={createNewChatAction}>
-            <Button
-              type="submit"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="새 채팅"
-            >
-              <Plus className="size-4" />
-            </Button>
+            <NewChatSubmit />
           </form>
           <ThemeToggle />
         </div>

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { BrandOrb } from '@/components/brand-orb'
+import { LoadingDots } from '@/components/loading-dots'
 import { cn } from '@/lib/utils'
 import { ToolRenderHtml } from './tool-render-html'
 import { ReasoningBlock } from './reasoning-block'
@@ -176,28 +177,7 @@ export function MessageList({
           })}
         </AnimatePresence>
 
-        {showWaitingDots && (
-          <div className="flex items-center gap-1.5 py-1">
-            <span
-              className="size-1.5 rounded-full bg-brand-1"
-              style={{
-                animation: 'brand-pulse 1.2s ease-in-out -0.3s infinite',
-              }}
-            />
-            <span
-              className="size-1.5 rounded-full bg-brand-2"
-              style={{
-                animation: 'brand-pulse 1.2s ease-in-out -0.15s infinite',
-              }}
-            />
-            <span
-              className="size-1.5 rounded-full bg-brand-3"
-              style={{
-                animation: 'brand-pulse 1.2s ease-in-out 0s infinite',
-              }}
-            />
-          </div>
-        )}
+        {showWaitingDots && <LoadingDots className="py-1" label="응답 대기 중" />}
 
         {(error || staleUserTrailing) && onRegenerate && (
           <div
