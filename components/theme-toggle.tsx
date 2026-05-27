@@ -1,18 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { useTheme } from 'next-themes'
 import { Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+const subscribe = () => () => {}
+const getSnapshot = () => true
+const getServerSnapshot = () => false
+
 export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
   // next-themes resolves on the client; gate animation until then so SSR markup
   // matches the first client paint (otherwise Sun/Moon flip on hydration).
-  useEffect(() => setMounted(true), [])
+  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   const isDark = mounted && resolvedTheme === 'dark'
 
