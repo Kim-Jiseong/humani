@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { createChat, getMostRecentChatId } from '@/lib/db/chats'
+import { getParticipant } from '@/lib/db/experiment'
+import { STEP_ROUTE } from '@/lib/experiment/config'
 
+// Step router. No UI — sends the participant to wherever they are in the flow.
 export default async function Home() {
   const supabase = await createClient()
   const {
@@ -9,6 +11,7 @@ export default async function Home() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const id = (await getMostRecentChatId()) ?? (await createChat())
-  redirect(`/chats/${id}`)
+  const participant = await getParticipant()
+  if (!participant) redirect('/survey')
+  redirect(STEP_ROUTE[participant.currentStep])
 }

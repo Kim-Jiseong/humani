@@ -8,9 +8,12 @@ import { cn } from '@/lib/utils'
 export function Composer({
   onSend,
   disabled,
+  locked,
 }: {
   onSend: (text: string) => void
   disabled?: boolean
+  // Experiment one-turn lock: the input is closed (no new message can be sent).
+  locked?: boolean
 }) {
   const [value, setValue] = useState('')
   const ref = useRef<HTMLTextAreaElement>(null)
@@ -24,6 +27,14 @@ export function Composer({
     onSend(trimmed)
     setValue('')
     ref.current?.focus()
+  }
+
+  if (locked) {
+    return (
+      <div className="glass flex min-h-12 items-center justify-center rounded-2xl px-4 py-3 text-center text-sm text-muted-foreground">
+        이 시나리오에서는 한 번만 입력할 수 있어요
+      </div>
+    )
   }
 
   // Enter inserts a newline (textarea default). Submission is button-only —
