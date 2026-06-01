@@ -16,11 +16,16 @@ import {
   LLM_FREQUENCY_OPTIONS,
   STEP_ROUTE,
   nextStep,
+  trialStep,
   type Gender,
   type LlmFrequency,
   type Step,
   type TrialIndex,
 } from '@/lib/experiment/config'
+import {
+  sanitizeSurveyAnswers,
+  type TrialSurveyAnswers,
+} from '@/lib/experiment/survey'
 
 function parseTrialStep(
   step: Step,
@@ -107,4 +112,43 @@ export async function advanceStepAction(from: Step): Promise<void> {
 
   await setCurrentStep(next)
   redirect(STEP_ROUTE[next])
+}
+
+/**
+ * Persist the post-trial survey response, then advance. Validates server-side
+ * (TLX 0..100 step 5; the two condition items required only when the trial's
+ * condition is 'related'). Upserts so a re-submit overwrites (needs the unique
+ * index on (user_id, trial_index)). Reuses advanceStepAction for the step move.
+ */
+export async function submitTrialSurveyAction(
+  trialIndex: TrialIndex,
+  answers: TrialSurveyAnswers,
+): Promise<void> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const participant = await getParticipant()
+  if (!participant) redirect('/survey')
+
+  const step = trialStep('survey', trialIndex)
+  if (participant.currentStep !== step) {
+    redirect(STEP_ROUTE[participant.currentStep])
+  }
+
+  const trial = await getTrial(trialIndex)
+  const clean = sanitizeSurveyAnswers(answers, trial?.condition === 'related')
+  if (!clean) redirect(STEP_ROUTE[step]) // invalid payload — client validates first
+
+  const { error } = await supabase
+    .from('experiment_survey_responses')
+    .upsert(
+      { user_id: user.id, trial_index: trialIndex, answers: clean },
+      { onConflict: 'user_id,trial_index' },
+    )
+  if (error) throw error
+
+  await advanceStepAction(step)
 }

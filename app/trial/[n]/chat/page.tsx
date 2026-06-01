@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { ensureTrial, getTrial } from '@/lib/db/experiment'
 import { loadChat, type ChatUser } from '@/lib/db/chats'
 import { Chat } from '@/components/chat/chat'
-import { parseTrialIndex, trialStep } from '@/lib/experiment/config'
+import { TrialChat } from '@/components/experiment/trial-chat'
+import { SCENARIO_TEXT, parseTrialIndex, trialStep } from '@/lib/experiment/config'
 
 export default async function TrialChatPage({
   params,
@@ -42,18 +43,27 @@ export default async function TrialChatPage({
     (initialMessages.some(m => m.role === 'assistant') &&
       initialMessages.some(m => m.role === 'user'))
 
+  const scenario = SCENARIO_TEXT[trial.scenario]
+
   return (
-    <Chat
-      id={trial.chatId}
-      initialMessages={initialMessages}
-      chats={[]}
-      user={chatUser}
-      experiment={{
-        trialIndex,
-        condition: trial.condition,
-        chatStep: step,
-        lockedInitially,
-      }}
-    />
+    <TrialChat
+      trialIndex={trialIndex}
+      scenario={scenario}
+      startInChat={lockedInitially}
+    >
+      <Chat
+        id={trial.chatId}
+        initialMessages={initialMessages}
+        chats={[]}
+        user={chatUser}
+        experiment={{
+          trialIndex,
+          condition: trial.condition,
+          scenario: trial.scenario,
+          chatStep: step,
+          lockedInitially,
+        }}
+      />
+    </TrialChat>
   )
 }

@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
 import { requireStep } from '@/lib/experiment/guard'
+import { getTrial } from '@/lib/db/experiment'
 import { ExperimentShell } from '@/components/experiment/experiment-shell'
-import { AdvanceButton } from '@/components/experiment/advance-button'
 import { ProgressBar } from '@/components/experiment/progress-bar'
+import { PostTrialSurveyForm } from '@/components/experiment/post-trial-survey-form'
 import { parseTrialIndex, trialStep } from '@/lib/experiment/config'
 
 export default async function TrialSurveyPage({
@@ -14,27 +15,23 @@ export default async function TrialSurveyPage({
   const trialIndex = parseTrialIndex(n)
   if (!trialIndex) notFound()
 
-  const step = trialStep('survey', trialIndex)
-  await requireStep(step)
+  await requireStep(trialStep('survey', trialIndex))
 
+  // condition decides whether the two "연관" items are shown/required.
+  const trial = await getTrial(trialIndex)
+  const isRelated = trial?.condition === 'related'
   const percent = trialIndex === 1 ? 50 : 100
-  const label = trialIndex === 1 ? '다음' : '제출하고 마치기'
 
   return (
     <ExperimentShell>
-      <div className="flex flex-1 flex-col justify-center gap-8 py-8">
-        <ProgressBar percent={percent} />
-
-        <div className="glass space-y-2 rounded-2xl px-5 py-7 text-center">
-          <h1 className="text-xl font-semibold tracking-tight">사후 설문 조사</h1>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            설문은 추후 제공될 예정입니다.
-            <br />
-            아래 버튼을 눌러 계속 진행해 주세요.
-          </p>
+      <div className="flex flex-1 flex-col gap-6 py-6">
+        <div className="space-y-3">
+          <ProgressBar percent={percent} />
+          <h1 className="text-2xl font-semibold tracking-tight">
+            사후 설문 조사
+          </h1>
         </div>
-
-        <AdvanceButton step={step} label={label} />
+        <PostTrialSurveyForm trialIndex={trialIndex} isRelated={isRelated} />
       </div>
     </ExperimentShell>
   )

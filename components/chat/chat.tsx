@@ -10,7 +10,7 @@ import { useMemo } from 'react'
 import type { ChatRow, ChatUser } from '@/lib/db/chats'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { createNewChatAction } from '@/app/actions/chats'
-import type { Step } from '@/lib/experiment/config'
+import type { ScenarioKey, Step } from '@/lib/experiment/config'
 import { ConditionBadge } from '@/components/experiment/condition-badge'
 import { ChatAdvance } from '@/components/experiment/chat-advance'
 import { MessageList } from './message-list'
@@ -26,6 +26,8 @@ import { NewChatSubmit } from './new-chat-submit'
 export type ExperimentMode = {
   trialIndex: 1 | 2
   condition: 'baseline' | 'related'
+  // Scenario of this trial; scopes the related-condition word suggestion search.
+  scenario: ScenarioKey
   // The 'trial{n}_chat' step this chat advances from. Passed as a string (not a
   // bound action) so only serializable data crosses the RSC→client boundary.
   chatStep: Step
@@ -139,6 +141,14 @@ export function Chat({
             onSend={text => sendMessage({ text })}
             disabled={busy}
             locked={composerLocked}
+            suggest={
+              experiment?.condition === 'related'
+                ? {
+                    scenario: experiment.scenario,
+                    trialIndex: experiment.trialIndex,
+                  }
+                : undefined
+            }
           />
         )}
       </footer>

@@ -1,31 +1,87 @@
 'use client'
 
-import { useRef, useState, type FormEvent } from 'react'
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { ArrowUp, Loader2 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+
+/** Related-condition word suggestion. Present only in 연관 trials. */
+type SuggestConfig = { scenario: 'A' | 'B'; trialIndex: 1 | 2 }
+
+function lastEojeol(text: string): string {
+  const parts = text.trimEnd().split(/\s+/)
+  return parts.length ? parts[parts.length - 1] : ''
+}
 
 export function Composer({
   onSend,
   disabled,
   locked,
+  suggest,
 }: {
   onSend: (text: string) => void
   disabled?: boolean
   // Experiment one-turn lock: the input is closed (no new message can be sent).
   locked?: boolean
+  // When set (연관 trials), each space queries /api/suggest and shows the top
+  // word above the input. Undefined for baseline trials and all free chat.
+  suggest?: SuggestConfig
 }) {
   const [value, setValue] = useState('')
+  const [suggestion, setSuggestion] = useState<string | null>(null)
   const ref = useRef<HTMLTextAreaElement>(null)
+  // True between compositionstart/end — Hangul IME emits intermediate jamo we
+  // must ignore; we only act on committed text.
+  const composingRef = useRef(false)
+  // Cancels the previous in-flight request when spaces come quickly.
+  const abortRef = useRef<AbortController | null>(null)
 
   const trimmed = value.trim()
   const canSend = trimmed.length > 0 && !disabled
+
+  function fireSuggest(eojeol: string) {
+    if (!suggest) return
+    abortRef.current?.abort()
+    const ctrl = new AbortController()
+    abortRef.current = ctrl
+    fetch('/api/suggest', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        scenario: suggest.scenario,
+        eojeol,
+        trialIndex: suggest.trialIndex,
+      }),
+      signal: ctrl.signal,
+    })
+      .then(r => (r.ok ? r.json() : { word: null }))
+      .then((d: { word: string | null }) => setSuggestion(d.word))
+      .catch(() => {}) // aborted / network — keep the previous suggestion
+  }
+
+  function handleChange(e: ChangeEvent<HTMLTextAreaElement>) {
+    const next = e.target.value
+    setValue(next)
+    if (!suggest || composingRef.current) return
+    if (next.trim() === '') {
+      setSuggestion(null)
+      return
+    }
+    // A space was just committed (new trailing whitespace) → the token right
+    // before it is the "previous word". Embeds + searches scenario vocabulary.
+    if (next.length > value.length && /\s$/.test(next) && !/\s$/.test(value)) {
+      const eojeol = lastEojeol(next.slice(0, -1))
+      if (eojeol) fireSuggest(eojeol)
+    }
+  }
 
   function submit(e?: FormEvent) {
     e?.preventDefault()
     if (!canSend) return
     onSend(trimmed)
     setValue('')
+    setSuggestion(null)
+    abortRef.current?.abort()
     ref.current?.focus()
   }
 
@@ -43,6 +99,17 @@ export function Composer({
 
   return (
     <form onSubmit={submit}>
+      {/* Related-condition suggestion: passive, display-only (no click insert).
+          Replaced on each space; sits just above the input. */}
+      {suggest && suggestion && (
+        <div className="mb-2 flex justify-center" aria-live="polite">
+          <span className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-foreground">
+            <span className="bg-brand-gradient size-1.5 rounded-full" aria-hidden />
+            {suggestion}
+          </span>
+        </div>
+      )}
+
       {/* Shell holds the textarea + send button; conic-border rotates the
           iridescent ring only when focus is inside (CSS :focus-within). */}
       <div
@@ -54,7 +121,13 @@ export function Composer({
         <Textarea
           ref={ref}
           value={value}
-          onChange={e => setValue(e.target.value)}
+          onChange={handleChange}
+          onCompositionStart={() => {
+            composingRef.current = true
+          }}
+          onCompositionEnd={() => {
+            composingRef.current = false
+          }}
           placeholder="메시지를 입력하세요…"
           rows={1}
           disabled={disabled}
