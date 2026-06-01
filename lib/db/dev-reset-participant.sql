@@ -13,8 +13,11 @@ where user_id = (select id from auth.users where email = 'prime@thermit.io')
       and chat_id is not null
   );
 
--- 2) 실험 응답 → 시도 → 참가자 순으로 삭제
+-- 2) 실험 응답 → 제시 로그 → 시도 → 참가자 순으로 삭제
 delete from public.experiment_survey_responses
+where user_id = (select id from auth.users where email = 'prime@thermit.io');
+
+delete from public.experiment_suggestions
 where user_id = (select id from auth.users where email = 'prime@thermit.io');
 
 delete from public.experiment_trials
@@ -35,4 +38,6 @@ select
   (select count(*) from public.experiment_trials
      where user_id = (select id from auth.users where email = 'prime@thermit.io')) as trials,
   (select count(*) from public.experiment_survey_responses
-     where user_id = (select id from auth.users where email = 'prime@thermit.io')) as survey_responses;
+     where user_id = (select id from auth.users where email = 'prime@thermit.io')) as survey_responses,
+  (select count(*) from public.experiment_suggestions
+     where user_id = (select id from auth.users where email = 'prime@thermit.io')) as suggestions;

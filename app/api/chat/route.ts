@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     // Server-side id generation so every assistant message has a stable,
     // non-empty client_id — required for upsert's (chat_id, client_id) key.
     generateMessageId: createIdGenerator({ prefix: 'msg', size: 16 }),
-    onFinish: ({ messages: finalMessages, isAborted }) => {
+    onFinish: async ({ messages: finalMessages, isAborted }) => {
       // Save ONLY after generation fully completes. If the client disconnected
       // mid-stream (e.g., user refreshed during slow Gemini thinking), the
       // backend aborts naturally — we do NOT want to persist a half-formed
@@ -67,7 +67,14 @@ export async function POST(req: Request) {
         console.warn('[onFinish] stream aborted — not persisting')
         return
       }
-      saveMessages(id, finalMessages).catch(console.error)
+      // Await so messages are committed before the client sees the stream end
+      // (and shows "다음"). Keeps persistence reliable and lockedInitially
+      // correct on reload; the step advance no longer re-reads these messages.
+      try {
+        await saveMessages(id, finalMessages)
+      } catch (err) {
+        console.error('[onFinish] saveMessages failed', err)
+      }
     },
   })
 }

@@ -2,7 +2,6 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { loadChat } from '@/lib/db/chats'
 import {
   createParticipant,
   ensureTrial,
@@ -100,13 +99,13 @@ export async function advanceStepAction(from: Step): Promise<void> {
     await ensureTrial(nextInfo.n)
   }
 
-  // Leaving a chat step → must have a completed user+assistant turn persisted.
+  // Leaving a chat step → stamp submission. We intentionally do NOT re-read the
+  // chat from the DB to "verify" a completed turn here: that read raced with the
+  // async message save in /api/chat and, when the user clicked "다음" quickly,
+  // bounced them back into the chat step (which shows the scenario recap) — a
+  // loop. The client only renders the "다음" CTA after the turn completes, so
+  // reaching here already implies a completed turn.
   if (fromInfo?.phase === 'chat') {
-    const trial = await getTrial(fromInfo.n)
-    const msgs = trial?.chatId ? await loadChat(trial.chatId) : []
-    const completed =
-      msgs.some(m => m.role === 'assistant') && msgs.some(m => m.role === 'user')
-    if (!completed) redirect(STEP_ROUTE[from]) // not finished — stay on chat
     await markTrialSubmitted(fromInfo.n)
   }
 

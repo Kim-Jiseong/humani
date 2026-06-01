@@ -16,3 +16,10 @@ export const EMBEDDING_DIM = 768
 
 /** Min Hangul length of the 조사-stripped stem before we bother embedding. */
 export const MIN_QUERY_LEN = 1
+
+/** Vector search fetch size. We pull one extra so we can drop the query word
+ *  itself (when it's the closest match) and still show SUGGEST_COUNT words. */
+export const SUGGEST_TOPK = 7
+
+/** Words shown above the input (rendered as 2 rows × 3). */
+export const SUGGEST_COUNT = 6

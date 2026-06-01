@@ -23,12 +23,12 @@ export function Composer({
   disabled?: boolean
   // Experiment one-turn lock: the input is closed (no new message can be sent).
   locked?: boolean
-  // When set (연관 trials), each space queries /api/suggest and shows the top
-  // word above the input. Undefined for baseline trials and all free chat.
+  // When set (연관 trials), each space queries /api/suggest and shows related
+  // words above the input. Undefined for baseline trials and all free chat.
   suggest?: SuggestConfig
 }) {
   const [value, setValue] = useState('')
-  const [suggestion, setSuggestion] = useState<string | null>(null)
+  const [suggestions, setSuggestions] = useState<string[]>([])
   const ref = useRef<HTMLTextAreaElement>(null)
   // True between compositionstart/end — Hangul IME emits intermediate jamo we
   // must ignore; we only act on committed text.
@@ -54,9 +54,9 @@ export function Composer({
       }),
       signal: ctrl.signal,
     })
-      .then(r => (r.ok ? r.json() : { word: null }))
-      .then((d: { word: string | null }) => setSuggestion(d.word))
-      .catch(() => {}) // aborted / network — keep the previous suggestion
+      .then(r => (r.ok ? r.json() : { words: [] }))
+      .then((d: { words?: string[] }) => setSuggestions(d.words ?? []))
+      .catch(() => {}) // aborted / network — keep the previous suggestions
   }
 
   function handleChange(e: ChangeEvent<HTMLTextAreaElement>) {
@@ -64,7 +64,7 @@ export function Composer({
     setValue(next)
     if (!suggest || composingRef.current) return
     if (next.trim() === '') {
-      setSuggestion(null)
+      setSuggestions([])
       return
     }
     // A space was just committed (new trailing whitespace) → the token right
@@ -80,7 +80,7 @@ export function Composer({
     if (!canSend) return
     onSend(trimmed)
     setValue('')
-    setSuggestion(null)
+    setSuggestions([])
     abortRef.current?.abort()
     ref.current?.focus()
   }
@@ -99,14 +99,18 @@ export function Composer({
 
   return (
     <form onSubmit={submit}>
-      {/* Related-condition suggestion: passive, display-only (no click insert).
-          Replaced on each space; sits just above the input. */}
-      {suggest && suggestion && (
-        <div className="mb-2 flex justify-center" aria-live="polite">
-          <span className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-foreground">
-            <span className="bg-brand-gradient size-1.5 rounded-full" aria-hidden />
-            {suggestion}
-          </span>
+      {/* Related-condition suggestions: passive, display-only (no click insert).
+          Up to 6 related words in 2 rows × 3, replaced on each space. */}
+      {suggest && suggestions.length > 0 && (
+        <div className="mb-2 grid grid-cols-3 gap-2" aria-live="polite">
+          {suggestions.map((w, i) => (
+            <span
+              key={`${w}-${i}`}
+              className="glass truncate rounded-full px-2.5 py-1.5 text-center text-[13px] font-medium text-foreground"
+            >
+              {w}
+            </span>
+          ))}
         </div>
       )}
 
