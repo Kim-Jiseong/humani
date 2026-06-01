@@ -66,10 +66,18 @@ function parseCsv(scenario: 'A' | 'B'): Row[] {
   const raw = readFileSync(path, 'utf8').replace(/^﻿/, '') // strip UTF-8 BOM
   const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
   lines.shift() // drop "카테고리,단어" header
-  return lines.map(line => {
+  // Dedupe by word within the scenario (the same word can appear under several
+  // categories) so the (scenario, word) upsert never touches a row twice.
+  const seen = new Set<string>()
+  const rows: Row[] = []
+  for (const line of lines) {
     const [category, word] = line.split(',')
-    return { scenario, category: category.trim(), word: word.trim() }
-  })
+    const w = (word ?? '').trim()
+    if (!w || seen.has(w)) continue
+    seen.add(w)
+    rows.push({ scenario, category: (category ?? '').trim(), word: w })
+  }
+  return rows
 }
 
 /** Embed words in chunks, returning pgvector text-format strings ("[1,2,...]"). */
