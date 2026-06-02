@@ -1,6 +1,21 @@
 import { Info } from 'lucide-react'
 import type { ScenarioContent, TrialIndex } from '@/lib/experiment/config'
 
+/** Render `note`, highlighting the `emphasis` keyword phrase in blue bold. */
+function EmphasizedNote({ note, emphasis }: { note: string; emphasis: string }) {
+  const idx = emphasis ? note.indexOf(emphasis) : -1
+  if (idx === -1) return <>{note}</>
+  return (
+    <>
+      {note.slice(0, idx)}
+      <strong className="font-semibold text-blue-600 dark:text-blue-400">
+        {emphasis}
+      </strong>
+      {note.slice(idx + emphasis.length)}
+    </>
+  )
+}
+
 /** Reminder shown on the scenario screen and the chat recap. */
 export function OneShotNotice() {
   return (
@@ -58,7 +73,7 @@ export function ScenarioView({
           </div>
         </dl>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          {scenario.note}
+          <EmphasizedNote note={scenario.note} emphasis={scenario.noteEmphasis} />
         </p>
       </div>
 

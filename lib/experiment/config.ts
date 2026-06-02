@@ -89,6 +89,8 @@ export type ScenarioContent = {
   output: string
   body: string
   note: string
+  // Keyword phrase within `note` to visually emphasize on the scenario screen.
+  noteEmphasis: string
 }
 
 export const SCENARIO_TEXT: Record<ScenarioKey, ScenarioContent> = {
@@ -98,13 +100,15 @@ export const SCENARIO_TEXT: Record<ScenarioKey, ScenarioContent> = {
     output: '자기소개 프레젠테이션 슬라이드',
     body: '당신은 오늘 서류 합격 통보와 함께, 내일 있을 면접에서 10분 간 자기소개를 해야 한다는 안내를 받았습니다. 자기소개의 내용은 자유롭게 구성하면 되며, 발표자료가 필요하다고 합니다. 자기소개를 준비할 시간이 많지 않은데 10분 분량을 채워야 해서, 생성형 AI(ex. ChatGPT, Gemini, Claude 등)에게 발표자료 초안 생성을 요청하려고 합니다.',
     note: '상황, 목차, 디자인 스타일 등을 포함하여 구체적으로 생성해야 합니다.',
+    noteEmphasis: '상황, 목차, 디자인 스타일',
   },
   B: {
     title: '최근 여행 후기 블로그 생성',
     topic: '최근 여행 후기 블로그',
-    output: '여행 후기 블로그 초안',
+    output: '여행 후기 블로그 초안(사진만 제외)',
     body: '당신은 최근에 다녀온 여행에 대한 기억이 사라지기 전에, 오늘은 꼭 여행 후기 블로그를 포스팅하려고 합니다. 블로그의 내용은 자유롭게 구성하면 되며, 글과 표 등을 문서에 먼저 작성 후 블로그 포스팅을 하며 사진을 추가하려고 합니다. 블로그에 쓸 내용을 직접 정리하기에는 다른 일정으로 바빠 시간이 없어서, 생성형 AI(ex. ChatGPT, Gemini, Claude 등)에게 블로그 초안 생성을 요청하려고 합니다.',
     note: '여행 목적, 여행 일정, 문서 레이아웃 등을 포함하여 구체적으로 생성해야 합니다.',
+    noteEmphasis: '여행 목적, 여행 일정, 문서 레이아웃',
   },
 }
 
