@@ -9,6 +9,11 @@ import {
 } from 'ai'
 import { z } from 'zod'
 import { saveMessages } from '@/lib/db/chats'
+import { getTrialByChatId } from '@/lib/db/experiment'
+import {
+  GENERAL_SYSTEM_PROMPT,
+  scenarioSystemPrompt,
+} from '@/lib/experiment/chat-prompts'
 
 export const maxDuration = 30
 
@@ -29,6 +34,13 @@ export async function POST(req: Request) {
   const { messages, id }: { messages: UIMessage[]; id: string } =
     await req.json()
 
+  // Pick the system prompt by scenario. A trial chat resolves to its scenario's
+  // one-shot completion prompt; a free chat (no trial) falls back to general.
+  const trial = await getTrialByChatId(id).catch(() => null)
+  const system = trial
+    ? scenarioSystemPrompt(trial.scenario)
+    : GENERAL_SYSTEM_PROMPT
+
   const result = streamText({
     model: google('gemini-3-flash-preview'),
     messages: await convertToModelMessages(messages),
@@ -42,8 +54,7 @@ export async function POST(req: Request) {
         },
       },
     },
-    system:
-      '간결하고 친근한 한국어 어시스턴트입니다. 표, 목록, 간단한 시각화를 보여줄 때 renderHtml 도구를 사용하세요. 도구에 넘기는 html은 self-contained 여야 하며 <script>를 절대 포함하지 마세요.',
+    system,
     onAbort: ({ steps }) => {
       console.warn(
         `[streamText] aborted after ${steps.length} step(s) — onFinish will not include a complete assistant`,

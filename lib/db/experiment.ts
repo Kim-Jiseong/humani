@@ -139,6 +139,21 @@ export async function getTrial(trialIndex: TrialIndex): Promise<Trial | null> {
 }
 
 /**
+ * Look up the trial backing a given chat. Returns null for free (non-trial)
+ * chats. RLS scopes this to the caller's own trials.
+ */
+export async function getTrialByChatId(chatId: string): Promise<Trial | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('experiment_trials')
+    .select(TRIAL_COLUMNS)
+    .eq('chat_id', chatId)
+    .maybeSingle()
+  if (error) throw error
+  return data ? mapTrial(data) : null
+}
+
+/**
  * Return the trial row for `trialIndex`, creating it (and its backing chat) on
  * first call. Scenario + condition are derived from the participant's group_type
  * and frozen on the row. Idempotent: a second call returns the existing row.
