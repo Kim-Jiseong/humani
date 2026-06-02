@@ -2,6 +2,17 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { ExperimentShell } from '@/components/experiment/experiment-shell'
 import {
   OneShotNotice,
@@ -40,13 +51,33 @@ export function TrialChat({
         scenario={scenario}
         notice={<OneShotNotice />}
         footer={
-          <Button
-            variant="brand"
-            onClick={() => setStarted(true)}
-            className="h-11 w-full rounded-2xl text-[15px] font-semibold"
-          >
-            채팅 시작하기
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant="brand"
+                  className="h-11 w-full rounded-2xl text-[15px] font-semibold"
+                />
+              }
+            >
+              채팅 시작하기
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>채팅을 시작할까요?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  채팅은 딱 1번만 입력할 수 있어요. 시나리오를 충분히
+                  숙지하셨나요?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>다시 볼게요</AlertDialogCancel>
+                <AlertDialogAction onClick={() => setStarted(true)}>
+                  네, 시작할게요
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         }
       />
     </ExperimentShell>

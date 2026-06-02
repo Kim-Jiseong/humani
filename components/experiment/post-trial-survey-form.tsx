@@ -25,12 +25,10 @@ const DEFAULT_TLX = 50
 function TlxSlider({
   item,
   value,
-  touched,
   onChange,
 }: {
   item: TlxItem
   value: number
-  touched: boolean
   onChange: (v: number) => void
 }) {
   return (
@@ -38,13 +36,8 @@ function TlxSlider({
       <div className="space-y-1.5">
         <div className="flex items-baseline justify-between gap-3">
           <h3 className="text-[15px] font-semibold">{item.title}</h3>
-          <span
-            className={cn(
-              'shrink-0 text-base font-bold tabular-nums',
-              touched ? 'text-brand-gradient' : 'text-muted-foreground/40',
-            )}
-          >
-            {touched ? value : '—'}
+          <span className="shrink-0 text-base font-bold tabular-nums text-brand-gradient">
+            {value}
           </span>
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
@@ -58,9 +51,6 @@ function TlxSlider({
         step={TLX_STEP}
         value={value}
         aria-label={item.title}
-        // Mark "touched" even when the value doesn't change (e.g. tapping the
-        // current position), so an intentional midpoint answer still counts.
-        onPointerDown={() => onChange(value)}
         onChange={e => onChange(Number(e.target.value))}
         className="w-full cursor-pointer py-1"
         style={{ accentColor: 'var(--brand-2)' }}
@@ -135,12 +125,6 @@ export function PostTrialSurveyForm({
         TLX_ITEMS.map(i => [i.key, DEFAULT_TLX]),
       ) as Record<TlxKey, number>,
   )
-  const [touched, setTouched] = useState<Record<TlxKey, boolean>>(
-    () =>
-      Object.fromEntries(
-        TLX_ITEMS.map(i => [i.key, false]),
-      ) as Record<TlxKey, boolean>,
-  )
   const [wordRecognition, setWordRecognition] =
     useState<WordRecognition | null>(null)
   const [wordInfluence, setWordInfluence] = useState<WordInfluence | null>(null)
@@ -148,13 +132,11 @@ export function PostTrialSurveyForm({
 
   function setTlx(key: TlxKey, v: number) {
     setValues(prev => ({ ...prev, [key]: v }))
-    setTouched(prev => (prev[key] ? prev : { ...prev, [key]: true }))
   }
 
-  const allTlxTouched = TLX_ITEMS.every(i => touched[i.key])
   const relatedDone =
     !isRelated || (wordRecognition !== null && wordInfluence !== null)
-  const complete = allTlxTouched && relatedDone
+  const complete = relatedDone
 
   function handleSubmit() {
     if (!complete || pending) return
@@ -183,7 +165,6 @@ export function PostTrialSurveyForm({
           key={item.key}
           item={item}
           value={values[item.key]}
-          touched={touched[item.key]}
           onChange={v => setTlx(item.key, v)}
         />
       ))}

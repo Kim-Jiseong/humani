@@ -8,10 +8,8 @@
 export const STEP_ORDER = [
   'survey',
   'intro',
-  'trial1_scenario',
   'trial1_chat',
   'trial1_survey',
-  'trial2_scenario',
   'trial2_chat',
   'trial2_survey',
   'done',
@@ -22,10 +20,8 @@ export type Step = (typeof STEP_ORDER)[number]
 export const STEP_ROUTE: Record<Step, string> = {
   survey: '/survey',
   intro: '/intro',
-  trial1_scenario: '/trial/1/scenario',
   trial1_chat: '/trial/1/chat',
   trial1_survey: '/trial/1/survey',
-  trial2_scenario: '/trial/2/scenario',
   trial2_chat: '/trial/2/chat',
   trial2_survey: '/trial/2/survey',
   done: '/done',
@@ -51,7 +47,7 @@ export function nextStep(step: Step): Step {
 
 export type GroupType = 1 | 2 | 3 | 4
 export type TrialIndex = 1 | 2
-export type TrialPhase = 'scenario' | 'chat' | 'survey'
+export type TrialPhase = 'chat' | 'survey'
 export type ScenarioKey = 'A' | 'B'
 export type Condition = 'baseline' | 'related'
 
@@ -129,8 +125,3 @@ export const LLM_FREQUENCY_OPTIONS: { value: LlmFrequency; label: string }[] = [
   { value: 'mid', label: '주 2–3회' },
   { value: 'high', label: '주 4회 이상' },
 ]
-
-export const CONDITION_LABEL: Record<Condition, string> = {
-  baseline: '기존 조건',
-  related: '연관 조건으로 분류됨',
-}

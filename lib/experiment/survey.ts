@@ -13,8 +13,6 @@ export const TLX_STEP = 5
 
 export type TlxKey =
   | 'mental_demand'
-  | 'physical_demand'
-  | 'temporal_demand'
   | 'effort'
   | 'performance'
   | 'frustration'
@@ -33,22 +31,6 @@ export const TLX_ITEMS: TlxItem[] = [
     title: '정신적 요구',
     description:
       '얼마나 많은 정신적 및 지각적 활동(예: 생각하기, 결정하기, 계산하기, 기억하기, 바라보기, 탐색하기 등)이 필요했습니까? 과제는 쉬웠습니까, 어려웠습니까? 단순했습니까, 복잡했습니까? 까다로웠습니까, 실수에 관대했습니까?',
-    lowLabel: '낮음',
-    highLabel: '높음',
-  },
-  {
-    key: 'physical_demand',
-    title: '신체적 요구',
-    description:
-      '얼마나 많은 신체적 활동(예: 밀기, 당기기, 돌리기, 제어하기, 활성화하기 등)이 필요했습니까? 과제는 쉬웠습니까, 많은 것을 요구했습니까? 느렸습니까, 빨랐습니까? 느슨했습니까, 아주 힘들었습니까? 편안했습니까, 고단했습니까?',
-    lowLabel: '낮음',
-    highLabel: '높음',
-  },
-  {
-    key: 'temporal_demand',
-    title: '시간적 요구',
-    description:
-      '과제 또는 과제 요소가 발생하는 속도 때문에 얼마나 시간적 압박을 느꼈습니까? 속도는 느리고 여유로웠습니까, 빠르고 정신없었습니까?',
     lowLabel: '낮음',
     highLabel: '높음',
   },

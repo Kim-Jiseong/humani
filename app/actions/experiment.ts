@@ -28,12 +28,12 @@ import {
 
 function parseTrialStep(
   step: Step,
-): { n: TrialIndex; phase: 'scenario' | 'chat' | 'survey' } | null {
-  const m = /^trial([12])_(scenario|chat|survey)$/.exec(step)
+): { n: TrialIndex; phase: 'chat' | 'survey' } | null {
+  const m = /^trial([12])_(chat|survey)$/.exec(step)
   if (!m) return null
   return {
     n: Number(m[1]) as TrialIndex,
-    phase: m[2] as 'scenario' | 'chat' | 'survey',
+    phase: m[2] as 'chat' | 'survey',
   }
 }
 

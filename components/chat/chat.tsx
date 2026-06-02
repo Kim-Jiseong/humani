@@ -11,7 +11,6 @@ import type { ChatRow, ChatUser } from '@/lib/db/chats'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { createNewChatAction } from '@/app/actions/chats'
 import type { ScenarioKey, Step } from '@/lib/experiment/config'
-import { ConditionBadge } from '@/components/experiment/condition-badge'
 import { ChatAdvance } from '@/components/experiment/chat-advance'
 import { MessageList } from './message-list'
 import { Composer } from './composer'
@@ -112,12 +111,6 @@ export function Chat({
         </div>
       </header>
 
-      {experiment?.condition === 'related' && (
-        <div className="flex shrink-0 justify-center px-3 pt-2">
-          <ConditionBadge />
-        </div>
-      )}
-
       <main className="relative flex-1 overflow-hidden">
         <MessageList
           messages={messages}
@@ -141,6 +134,16 @@ export function Chat({
             onSend={text => sendMessage({ text })}
             disabled={busy}
             locked={composerLocked}
+            chatId={id}
+            trial={
+              experiment
+                ? {
+                    trialIndex: experiment.trialIndex,
+                    scenario: experiment.scenario,
+                    condition: experiment.condition,
+                  }
+                : undefined
+            }
             suggest={
               experiment?.condition === 'related'
                 ? {
