@@ -6,6 +6,7 @@ import {
   ChevronRight,
   ClipboardList,
   Clock,
+  Info,
   LayoutDashboard,
   Sigma,
   Sparkles,
@@ -47,6 +48,15 @@ const TD = ({ children, className }: { children?: React.ReactNode; className?: s
   <td className={cn('px-3 py-2 whitespace-nowrap tabular-nums', className)}>{children}</td>
 )
 
+function InfoNote({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2 rounded-xl bg-muted/40 px-3.5 py-3 text-xs leading-relaxed text-muted-foreground ring-1 ring-foreground/5">
+      <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground/70" />
+      <div className="space-y-1">{children}</div>
+    </div>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Grouped pause aggregate block (condition / scenario / trial-order)
 // ---------------------------------------------------------------------------
@@ -73,15 +83,15 @@ function GroupAggBlock({ groups }: { groups: GroupAgg[] }) {
           <thead>
             <tr className="border-b">
               <TH>그룹</TH>
-              <TH className="text-right">유저 수</TH>
+              <TH className="text-right">참가자 수</TH>
               <TH className="text-right">중지 수</TH>
               <TH className="text-right">평균</TH>
               <TH className="text-right">중앙</TH>
               <TH className="text-right">최소</TH>
               <TH className="text-right">최대</TH>
               <TH className="text-right">총합</TH>
-              <TH className="text-right">유저당 평균 횟수</TH>
-              <TH className="text-right">유저당 평균 시간</TH>
+              <TH className="text-right">참가자당 평균 횟수</TH>
+              <TH className="text-right">참가자당 평균 시간</TH>
             </tr>
           </thead>
           <tbody>
@@ -102,12 +112,16 @@ function GroupAggBlock({ groups }: { groups: GroupAgg[] }) {
           </tbody>
         </table>
       </div>
+      <p className="text-xs text-muted-foreground">
+        참가자 수 = 해당 그룹에서 중지가 1회 이상 기록된 참가자 수 · 참가자당 값 =
+        참가자별 합계의 평균
+      </p>
     </div>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Per-user × trial detail table (sortable + clickable rows)
+// Per-participant × trial detail table (sortable + clickable rows)
 // ---------------------------------------------------------------------------
 
 type SortKey = 'seq' | 'count' | 'avg' | 'sum'
@@ -244,10 +258,14 @@ function CountCard({
   title,
   items,
   horizontal,
+  valueName,
+  labelPrefix,
 }: {
   title: string
   items: CountItem[]
   horizontal?: boolean
+  valueName?: string
+  labelPrefix?: string
 }) {
   return (
     <div className="space-y-2 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
@@ -255,6 +273,8 @@ function CountCard({
       <CountBarChart
         data={items.map(i => ({ label: i.label, count: i.count }))}
         horizontal={horizontal}
+        valueName={valueName}
+        labelPrefix={labelPrefix}
         height={horizontal ? Math.max(120, items.length * 34) : 190}
       />
     </div>
@@ -367,10 +387,26 @@ export function DashboardView({
             {/* ---------------- 개요 ---------------- */}
             {tab === 'overview' && (
               <>
+                <InfoNote>
+                  <p>
+                    <strong className="text-foreground">실험 구조:</strong> 참가자 1명 =
+                    Trial 2개. 각 Trial은 시나리오(A·B 중 하나)와 조건(baseline·related 중
+                    하나)의 조합입니다.
+                  </p>
+                  <p>
+                    한 참가자는 <strong className="text-foreground">두 조건</strong>(baseline·related)과{' '}
+                    <strong className="text-foreground">두 시나리오</strong>(A·B)에 각각 한 번씩
+                    참여합니다. 그래서 아래 ‘조건 비교 / 시나리오 비교’의 참가자 수를 모두 더하면
+                    전체 참가자 수의 약 2배가 됩니다 — 같은 사람이 서로 다른 Trial로 양쪽 그룹에
+                    들어가기 때문입니다. 각 중지 기록은 그것이 발생한 Trial의 조건·시나리오로
+                    분류되어 집계됩니다.
+                  </p>
+                </InfoNote>
+
                 <Section title="개요" icon={<LayoutDashboard className="size-4" />}>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                    <StatCard label="참가자" value={formatInt(overview.participants)} hint={`완료 ${overview.completed}명`} icon={<Users className="size-4" />} accent="indigo" />
-                    <StatCard label="제출 Trial" value={formatInt(overview.trialsSubmitted)} icon={<ClipboardList className="size-4" />} accent="cyan" />
+                    <StatCard label="참가자" value={formatInt(overview.participants)} hint={`완료 ${overview.completed}명 · Trial ${overview.trialsSubmitted}개`} icon={<Users className="size-4" />} accent="indigo" />
+                    <StatCard label="제출 Trial" value={formatInt(overview.trialsSubmitted)} hint="참가자 1명당 최대 2개" icon={<ClipboardList className="size-4" />} accent="cyan" />
                     <StatCard label="총 중지 수" value={formatInt(overview.pauseEvents)} icon={<Activity className="size-4" />} accent="emerald" />
                     <StatCard label="이벤트 평균 중지시간" value={formatMs(overview.allEvents.avgMs)} hint={`중앙 ${formatMs(overview.allEvents.medianMs)}`} icon={<Timer className="size-4" />} accent="amber" />
                     <StatCard label="총 중지시간" value={formatMs(overview.allEvents.sumMs)} icon={<Sigma className="size-4" />} accent="pink" />
@@ -378,24 +414,24 @@ export function DashboardView({
                 </Section>
 
                 <Section
-                  title="전체 유저 기준 중지 통계"
+                  title="전체 참가자 기준 중지 통계"
                   icon={<TrendingUp className="size-4" />}
-                  description={`유저별 합계를 모아 계산 (중지 데이터가 있는 유저 ${overview.nUsersWithPauses}명 기준)`}
+                  description={`참가자별 합계를 모아 계산 (중지 데이터가 있는 참가자 ${overview.nUsersWithPauses}명 기준)`}
                 >
                   <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-                    <StatCard label="유저당 중지 횟수 · 평균" value={formatNum(overview.perUserCount.mean)} accent="indigo" />
-                    <StatCard label="유저당 중지 횟수 · 중앙" value={formatNum(overview.perUserCount.median)} accent="indigo" />
-                    <StatCard label="유저당 중지 횟수 · 총합" value={formatInt(overview.perUserCount.sum)} accent="indigo" />
-                    <StatCard label="유저당 중지 시간 · 평균" value={formatMs(overview.perUserSumMs.mean)} accent="emerald" />
-                    <StatCard label="유저당 중지 시간 · 중앙" value={formatMs(overview.perUserSumMs.median)} accent="emerald" />
-                    <StatCard label="유저당 중지 시간 · 총합" value={formatMs(overview.perUserSumMs.sum)} accent="emerald" />
+                    <StatCard label="참가자당 중지 횟수 · 평균" value={formatNum(overview.perUserCount.mean)} accent="indigo" />
+                    <StatCard label="참가자당 중지 횟수 · 중앙" value={formatNum(overview.perUserCount.median)} accent="indigo" />
+                    <StatCard label="참가자당 중지 횟수 · 총합" value={formatInt(overview.perUserCount.sum)} accent="indigo" />
+                    <StatCard label="참가자당 중지 시간 · 평균" value={formatMs(overview.perUserSumMs.mean)} accent="emerald" />
+                    <StatCard label="참가자당 중지 시간 · 중앙" value={formatMs(overview.perUserSumMs.median)} accent="emerald" />
+                    <StatCard label="참가자당 중지 시간 · 총합" value={formatMs(overview.perUserSumMs.sum)} accent="emerald" />
                   </div>
                 </Section>
 
                 <Section
                   title="조건 비교 · baseline vs related"
                   icon={<Activity className="size-4" />}
-                  description="워드클라우드(단어 추천) 표시 여부에 따른 중지 비교 — 이 실험의 핵심 대비"
+                  description="워드클라우드(단어 추천) 표시 여부에 따른 중지 비교 — 이 실험의 핵심 대비. 각 참가자는 두 조건에 모두 1회씩 포함됩니다."
                 >
                   <GroupAggBlock groups={byCondition} />
                 </Section>
@@ -421,7 +457,7 @@ export function DashboardView({
             {tab === 'participants' && (
               <>
                 <Section
-                  title="유저 × Trial 상세"
+                  title="참가자 × Trial 상세"
                   icon={<Users className="size-4" />}
                   description="행을 클릭하면 중지 이벤트·설문까지 세부 내역이 열립니다. 헤더의 중지 수/평균/총합으로 정렬할 수 있습니다."
                 >
@@ -429,10 +465,10 @@ export function DashboardView({
                 </Section>
                 <Section title="참가자 인구통계">
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <CountCard title="성별" items={demographics.gender} />
-                    <CountCard title="연령대" items={demographics.age} />
-                    <CountCard title="LLM 사용 빈도" items={demographics.llmFrequency} />
-                    <CountCard title="그룹 배정" items={demographics.group} />
+                    <CountCard title="성별" items={demographics.gender} valueName="참가자 수" />
+                    <CountCard title="연령대" items={demographics.age} valueName="참가자 수" />
+                    <CountCard title="LLM 사용 빈도" items={demographics.llmFrequency} valueName="참가자 수" />
+                    <CountCard title="그룹 배정" items={demographics.group} valueName="참가자 수" />
                   </div>
                 </Section>
               </>
@@ -457,8 +493,8 @@ export function DashboardView({
                   />
                 </div>
                 <div className="grid gap-4 lg:grid-cols-2">
-                  <CountCard title="단어 인지 (related 조건)" items={survey.wordRecognition} horizontal />
-                  <CountCard title="단어 영향 (related 조건)" items={survey.wordInfluence} horizontal />
+                  <CountCard title="단어 인지 (related 조건)" items={survey.wordRecognition} valueName="응답 수" horizontal />
+                  <CountCard title="단어 영향 (related 조건)" items={survey.wordInfluence} valueName="응답 수" horizontal />
                 </div>
               </Section>
             )}
@@ -468,13 +504,18 @@ export function DashboardView({
               <Section title="단어 추천 로그" icon={<Sparkles className="size-4" />} description={`총 ${suggestions.total}건 제시`}>
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="space-y-2 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
-                    <div className="text-sm font-medium">유저별 추천 제시 횟수</div>
+                    <div className="text-sm font-medium">참가자별 추천 제시 횟수</div>
+                    <p className="text-xs text-muted-foreground">
+                      가로축 = 참가자 번호(#), 막대 = 해당 참가자에게 단어가 제시된 횟수
+                    </p>
                     <CountBarChart
                       data={suggestions.perUser.map(u => ({ label: `#${u.seq}`, count: u.count }))}
+                      valueName="추천 제시 횟수"
+                      labelPrefix="참가자 "
                       height={200}
                     />
                   </div>
-                  <CountCard title="자주 쓰인 쿼리 단어 (상위 15)" items={suggestions.topWords} horizontal />
+                  <CountCard title="자주 쓰인 쿼리 단어 (상위 15)" items={suggestions.topWords} valueName="추천 횟수" labelPrefix="단어 " horizontal />
                 </div>
               </Section>
             )}

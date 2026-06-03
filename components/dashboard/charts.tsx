@@ -83,16 +83,30 @@ export function GroupedBarChart({
   )
 }
 
-/** Single-series bar chart where each bar gets its own color. */
+/**
+ * Single-series bar chart where each bar gets its own color.
+ * - `valueName`: what the bar's number means (shown in the tooltip row).
+ * - `labelPrefix`: prepended to the category in the tooltip header so it reads
+ *   as a full phrase (e.g. "참가자 #3") instead of repeating the bare axis tick.
+ */
 export function CountBarChart({
   data,
   height = 220,
   horizontal = false,
+  valueName = '값',
+  labelPrefix,
 }: {
   data: { label: string; count: number }[]
   height?: number
   horizontal?: boolean
+  valueName?: string
+  labelPrefix?: string
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const labelFormatter: any = labelPrefix
+    ? (l: unknown) => `${labelPrefix}${l}`
+    : undefined
+
   return (
     <div className="text-muted-foreground" style={{ width: '100%', height }}>
       <ResponsiveContainer>
@@ -104,7 +118,7 @@ export function CountBarChart({
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(127,127,127,0.15)" vertical={false} />
           {horizontal ? (
             <>
-              <XAxis type="number" {...axisProps} />
+              <XAxis type="number" {...axisProps} allowDecimals={false} />
               <YAxis type="category" dataKey="label" width={150} {...axisProps} />
             </>
           ) : (
@@ -113,8 +127,8 @@ export function CountBarChart({
               <YAxis {...axisProps} width={40} allowDecimals={false} />
             </>
           )}
-          <Tooltip {...tooltipStyle} />
-          <Bar dataKey="count" name="명/건" radius={[4, 4, 0, 0]}>
+          <Tooltip {...tooltipStyle} labelFormatter={labelFormatter} />
+          <Bar dataKey="count" name={valueName} radius={[4, 4, 0, 0]}>
             {data.map((_, i) => (
               <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
             ))}

@@ -138,46 +138,77 @@ function mapSuggestion(r: any): DashSuggestion {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
+// PostgREST caps each request at a fixed number of rows (Supabase default 1000),
+// so a plain .select() silently truncates once a table grows past that. Page
+// through with .range() in PAGE-sized chunks until a short page signals the end.
+// chat_pause_events / experiment_suggestions both exceed 1000 rows now, and only
+// these read paths need the full set — the per-user write paths stay scoped by RLS.
+const PAGE = 1000
+
+type SupabaseAdmin = ReturnType<typeof createAdminClient>
+
+async function fetchAll(
+  supabase: SupabaseAdmin,
+  table: string,
+  columns: string,
+  order?: { column: string; ascending: boolean },
+): Promise<Record<string, unknown>[]> {
+  const rows: Record<string, unknown>[] = []
+  for (let from = 0; ; from += PAGE) {
+    let query = supabase
+      .from(table)
+      .select(columns)
+      .range(from, from + PAGE - 1)
+    if (order) query = query.order(order.column, { ascending: order.ascending })
+    const { data, error } = await query
+    if (error) throw error
+    const batch = (data ?? []) as unknown as Record<string, unknown>[]
+    rows.push(...batch)
+    if (batch.length < PAGE) break
+  }
+  return rows
+}
+
 export async function fetchDashboardData(): Promise<DashboardData> {
   const supabase = createAdminClient()
 
   const [participants, trials, pauseEvents, surveys, suggestions] =
     await Promise.all([
-      supabase
-        .from('experiment_participants')
-        .select(
-          'user_id, seq, group_type, age, gender, llm_frequency, current_step, completed_at, created_at',
-        )
-        .order('seq', { ascending: true }),
-      supabase
-        .from('experiment_trials')
-        .select('user_id, trial_index, scenario, condition, chat_id, submitted_at'),
-      supabase
-        .from('chat_pause_events')
-        .select(
-          'user_id, trial_index, scenario, condition, suggest_active, seq, duration_ms, query_eojeol, suggested_words, created_at',
-        )
-        .order('created_at', { ascending: true }),
-      supabase
-        .from('experiment_survey_responses')
-        .select('user_id, trial_index, answers'),
-      supabase
-        .from('experiment_suggestions')
-        .select(
-          'user_id, trial_index, scenario, query_eojeol, query_word, suggested_words, similarities, created_at',
-        )
-        .order('created_at', { ascending: true }),
+      fetchAll(
+        supabase,
+        'experiment_participants',
+        'user_id, seq, group_type, age, gender, llm_frequency, current_step, completed_at, created_at',
+        { column: 'seq', ascending: true },
+      ),
+      fetchAll(
+        supabase,
+        'experiment_trials',
+        'user_id, trial_index, scenario, condition, chat_id, submitted_at',
+      ),
+      fetchAll(
+        supabase,
+        'chat_pause_events',
+        'user_id, trial_index, scenario, condition, suggest_active, seq, duration_ms, query_eojeol, suggested_words, created_at',
+        { column: 'created_at', ascending: true },
+      ),
+      fetchAll(
+        supabase,
+        'experiment_survey_responses',
+        'user_id, trial_index, answers',
+      ),
+      fetchAll(
+        supabase,
+        'experiment_suggestions',
+        'user_id, trial_index, scenario, query_eojeol, query_word, suggested_words, similarities, created_at',
+        { column: 'created_at', ascending: true },
+      ),
     ])
 
-  for (const res of [participants, trials, pauseEvents, surveys, suggestions]) {
-    if (res.error) throw res.error
-  }
-
   return {
-    participants: (participants.data ?? []).map(mapParticipant),
-    trials: (trials.data ?? []).map(mapTrial),
-    pauseEvents: (pauseEvents.data ?? []).map(mapPause),
-    surveys: (surveys.data ?? []).map(mapSurvey),
-    suggestions: (suggestions.data ?? []).map(mapSuggestion),
+    participants: participants.map(mapParticipant),
+    trials: trials.map(mapTrial),
+    pauseEvents: pauseEvents.map(mapPause),
+    surveys: surveys.map(mapSurvey),
+    suggestions: suggestions.map(mapSuggestion),
   }
 }

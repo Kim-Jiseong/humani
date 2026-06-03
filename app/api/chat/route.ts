@@ -15,7 +15,11 @@ import {
   scenarioSystemPrompt,
 } from '@/lib/experiment/chat-prompts'
 
-export const maxDuration = 30
+// Vercel Hobby caps Serverless Functions at 60s (without Fluid Compute).
+// Gemini with thinkingLevel: 'high' regularly streams past 30s, so we use the
+// plan's hard ceiling. For more headroom, enable Fluid Compute on Vercel
+// (Hobby supports it) and/or lower thinkingLevel below.
+export const maxDuration = 60
 
 const renderHtml = tool({
   description:
