@@ -1,24 +1,19 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { fetchDashboardData } from '@/lib/db/dashboard'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 import { DashboardView } from '@/components/dashboard/dashboard-view'
 
-// Reads cookies (auth) + live DB via the service-role client — never static.
+// Reads live DB via the service-role client — never static.
 export const dynamic = 'force-dynamic'
 
 // Researcher-facing analytics across ALL participants. Data is read with the
 // service-role client (RLS bypassed) inside fetchDashboardData — that client
 // and its key stay server-side; only the serialized summary crosses to the
-// client view. Access is login-gated only (no role allowlist, by request);
-// do NOT expose this route on a public deployment as-is.
+// client view.
+//
+// Access: OPEN (no auth). `/dashboard` is allow-listed in proxy.ts and this
+// page has no login gate, by request. WARNING: anyone with the URL can see all
+// participants' data — do not treat the deployed URL as secret.
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
   const data = await fetchDashboardData()
   const generatedAt = new Date().toISOString()
 

@@ -1,7 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PUBLIC_PATH_PREFIXES = ['/login', '/auth']
+// `/dashboard` is the researcher analytics page — intentionally accessible
+// without an experiment login (it reads data via the service-role client).
+const PUBLIC_PATH_PREFIXES = ['/login', '/auth', '/dashboard']
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
