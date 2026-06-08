@@ -3,7 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 // `/dashboard` is the researcher analytics page — intentionally accessible
 // without an experiment login (it reads data via the service-role client).
-const PUBLIC_PATH_PREFIXES = ['/login', '/auth', '/dashboard']
+// `/api/dashboard` are its data-export / SQL-runner routes (also service-role,
+// open by request); without this they'd 307 → /login and return HTML.
+const PUBLIC_PATH_PREFIXES = ['/login', '/auth', '/dashboard', '/api/dashboard']
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
