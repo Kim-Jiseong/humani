@@ -147,7 +147,9 @@ const PAGE = 1000
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
 
-async function fetchAll(
+// Exported so the data-export route (lib/db/export.ts consumers) shares this one
+// paginator instead of re-implementing the .range() loop.
+export async function fetchAll(
   supabase: SupabaseAdmin,
   table: string,
   columns: string,

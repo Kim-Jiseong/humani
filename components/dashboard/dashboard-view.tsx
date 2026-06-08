@@ -6,6 +6,7 @@ import {
   ChevronRight,
   ClipboardList,
   Clock,
+  Database,
   Info,
   LayoutDashboard,
   Sigma,
@@ -30,23 +31,11 @@ import {
 } from '@/lib/dashboard/aggregate'
 import type { DashboardData } from '@/lib/db/dashboard'
 import { GroupedBarChart, CountBarChart } from '@/components/dashboard/charts'
-import { Badge, Section, StatCard } from '@/components/dashboard/primitives'
+import { Badge, Section, StatCard, TH, TD } from '@/components/dashboard/primitives'
 import { FilterBar } from '@/components/dashboard/filter-bar'
 import { RefreshButton } from '@/components/dashboard/refresh-button'
 import { UserDetailSheet } from '@/components/dashboard/user-detail-sheet'
-
-// ---------------------------------------------------------------------------
-// Reusable table cells
-// ---------------------------------------------------------------------------
-
-const TH = ({ children, className }: { children?: React.ReactNode; className?: string }) => (
-  <th className={cn('px-3 py-2 text-left font-medium whitespace-nowrap text-muted-foreground', className)}>
-    {children}
-  </th>
-)
-const TD = ({ children, className }: { children?: React.ReactNode; className?: string }) => (
-  <td className={cn('px-3 py-2 whitespace-nowrap tabular-nums', className)}>{children}</td>
-)
+import { DataExport } from '@/components/dashboard/data-export'
 
 function InfoNote({ children }: { children: React.ReactNode }) {
   return (
@@ -285,7 +274,7 @@ function CountCard({
 // Tabs
 // ---------------------------------------------------------------------------
 
-type TabKey = 'overview' | 'pauses' | 'participants' | 'survey' | 'suggestions'
+type TabKey = 'overview' | 'pauses' | 'participants' | 'survey' | 'suggestions' | 'export'
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'overview', label: '개요', icon: <LayoutDashboard className="size-4" /> },
@@ -293,6 +282,7 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'participants', label: '참가자', icon: <Users className="size-4" /> },
   { key: 'survey', label: '설문', icon: <ClipboardList className="size-4" /> },
   { key: 'suggestions', label: '단어 추천', icon: <Sparkles className="size-4" /> },
+  { key: 'export', label: '내보내기 / SQL', icon: <Database className="size-4" /> },
 ]
 
 // ---------------------------------------------------------------------------
@@ -369,6 +359,12 @@ export function DashboardView({
       </div>
 
       <div className="space-y-5">
+        {tab === 'export' ? (
+          // Export / SQL bypasses filters and the empty-state guard — it must
+          // work even with zero collected rows.
+          <DataExport />
+        ) : (
+        <>
         <FilterBar
           values={filters}
           onChange={patch => setFilters(f => ({ ...f, ...patch }))}
@@ -520,6 +516,8 @@ export function DashboardView({
               </Section>
             )}
           </div>
+        )}
+        </>
         )}
       </div>
 

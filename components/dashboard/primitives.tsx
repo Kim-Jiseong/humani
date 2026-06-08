@@ -106,6 +106,16 @@ export function Badge({
   )
 }
 
+// Shared table cells (used by dashboard-view tables and the SQL result table).
+export const TH = ({ children, className }: { children?: React.ReactNode; className?: string }) => (
+  <th className={cn('px-3 py-2 text-left font-medium whitespace-nowrap text-muted-foreground', className)}>
+    {children}
+  </th>
+)
+export const TD = ({ children, className }: { children?: React.ReactNode; className?: string }) => (
+  <td className={cn('px-3 py-2 whitespace-nowrap tabular-nums', className)}>{children}</td>
+)
+
 export type SegOption<T extends string> = {
   value: T
   label: string
