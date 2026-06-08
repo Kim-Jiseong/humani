@@ -4,6 +4,13 @@ import { useState } from 'react'
 import { AlertTriangle, Database, Download, Play, Table2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Section, Segmented, TH, TD } from '@/components/dashboard/primitives'
 
 // Table names offered for per-table CSV export. Mirrors EXPORT_TABLES in
@@ -118,17 +125,23 @@ export function DataExport() {
           {format === 'csv' && (
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">테이블</label>
-              <select
+              <Select
                 value={table}
-                onChange={e => setTable(e.target.value as (typeof CSV_TABLES)[number])}
-                className={inputClasses('h-9 min-w-56')}
+                onValueChange={(v: (typeof CSV_TABLES)[number] | null) => {
+                  if (v) setTable(v)
+                }}
               >
-                {CSV_TABLES.map(t => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="min-w-56">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CSV_TABLES.map(t => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
